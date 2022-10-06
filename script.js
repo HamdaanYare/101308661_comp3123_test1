@@ -1,24 +1,46 @@
-const lowerCaseWords = (inputArray) => {
-	const promise = new Promise((resolve, reject) => {
-		try {
-			// Filter the array to get only strings
-			const strings = inputArray.filter(
-				(item) => typeof item === "string"
-			);
-			// Map strings to a new array where all strings are now lower cased.
-			const lowerCasedWords = strings.map((string) =>
-				string.toLowerCase()
-			);
-			resolve(lowerCasedWords);
-		} catch (err) {
-			console.log(err);
-		}
-	});
+const fs = require("fs");
+const path = require("path");
 
-	promise.then((res) => console.log(res));
+const removeLogFiles = () => {
+	const directory = __dirname + "/logs";
+    // Getting filenames in the directory
+	fs.readdir(directory, (err, files) => {
+		if (err) throw err;
+
+		console.log("Removed files:", files);
+
+        // Removing files from directory
+		for (const file of files) {
+			fs.unlink(path.join(directory, file), (err) => {
+				if (err) throw err;
+			});
+		}
+		fs.rmSync(directory, { recursive: true, force: true });
+	});
 };
 
+const createLogFiles = () => {
+	const directory = __dirname + "/logs";
 
+	if (!fs.existsSync(directory)) {
+		fs.mkdirSync(directory);
+	}
 
-const mixedArray = ["PIZZA", 10, true, 25, false, "Wings"];
-lowerCaseWords(mixedArray);
+	for (let i = 0; i < 10; i++) {
+		fs.writeFile(
+			`${directory}/log${i}.txt`,
+			"Hello from log" + i,
+			function (err) {
+				if (err) throw err;
+			}
+		);
+	}
+
+	fs.readdir(directory, (err, files) => {
+		if (err) throw err;
+		console.log("Created files:", files);
+	});
+};
+
+createLogFiles();
+removeLogFiles();
